@@ -19,19 +19,20 @@ This project focuses on comprehensive behavioral analysis of retail transaction 
 
 ## Table of Contents
 
-1. [Problem Statement](#problem-statement)
-2. [Objectives](#objectives)
-3. [Dataset Information](#dataset-information)
-4. [Analysis Philosophy & Methodology](#analysis-philosophy--methodology)
-5. [Research Questions](#research-questions)
-6. [Project Structure](#project-structure)
-7. [Methodology & Implementation](#methodology--implementation)
-8. [Key Findings](#key-findings)
-9. [Technologies & Tools](#technologies--tools)
-10. [Installation & Setup](#installation--setup)
-11. [Usage](#usage)
-12. [Future Work](#future-work)
-13. [References](#references)
+1. [Contributors](#contributors)
+2. [Problem Statement](#problem-statement)
+3. [Objectives](#objectives)
+4. [Dataset Information](#dataset-information)
+5. [Analysis Philosophy & Methodology](#analysis-philosophy--methodology)
+6. [Research Questions](#research-questions)
+7. [Project Structure](#project-structure)
+8. [Methodology & Implementation](#methodology--implementation)
+9. [Key Findings](#key-findings)
+10. [Technologies & Tools](#technologies--tools)
+11. [Installation & Setup](#installation--setup)
+12. [Usage](#usage)
+13. [Future Work](#future-work)
+14. [References](#references)
 
 ---
 
@@ -373,6 +374,7 @@ Modeling → Validation → Visualization → Insights & Recommendations
 
 ### Data Processing
 - **Jupyter Notebooks**: Interactive development
+- **Google Colab**: Cloud-based notebook environment (Primary platform)
 - **Scipy**: Statistical functions
 
 ### Version Control
@@ -384,10 +386,26 @@ Modeling → Validation → Visualization → Insights & Recommendations
 ## Installation & Setup
 
 ### Prerequisites
+
+**For Google Colab (Recommended)**:
+- Google account
+- Access to Google Colab (free)
+- No local installation needed!
+
+**For Local Development**:
 - Python 3.8 or higher
 - pip or conda package manager
 
 ### Installation Steps
+
+#### Option 1: Google Colab (Recommended)
+
+1. **Open Google Colab**: Go to [colab.research.google.com](https://colab.research.google.com/)
+2. **Upload notebooks**: Upload the `.ipynb` files from the `notebooks/` directory
+3. **Install packages**: Each notebook includes installation commands that will run automatically
+4. No additional setup required!
+
+#### Option 2: Local Installation
 
 1. **Clone the repository**:
 ```bash
@@ -429,7 +447,42 @@ scipy>=1.9.0
 
 ## Usage
 
-### Running the Analysis
+### Running on Google Colab (Recommended)
+
+The notebooks are optimized for Google Colab. Follow these steps:
+
+1. **Access the Colab workspace**:
+   - **Team Colab Link**: [Open Colab Workspace](https://colab.research.google.com/drive/1TR2k5w3yV2TNT4fVq-lSpSzgH8AfQBeS?usp=sharing)
+   - Upload the notebooks from the `notebooks/` directory to your Colab workspace
+   - Or clone the repository to Google Drive and open from there
+
+2. **Setup in Colab**:
+   - Each notebook includes a setup cell at the beginning
+   - Run the setup cell to mount Google Drive (if needed) and install packages
+   - The setup will install all required dependencies automatically
+
+3. **Load the dataset**:
+   - **Option A**: Upload directly to Colab
+     - Click on Files → Upload
+     - Upload the dataset file (OnlineRetail.csv or OnlineRetail.xlsx)
+   - **Option B**: Use Google Drive
+     - Upload dataset to Google Drive
+     - Mount Drive in the notebook
+     - Update the file path accordingly
+   - **Option C**: Download directly from UCI
+     - Use the wget command provided in the notebook
+     - Downloads directly from UCI repository
+
+4. **Execute notebooks in order**:
+   - Start with `01_data_exploration.ipynb`
+   - Proceed sequentially through the analysis pipeline
+   - Each notebook is self-contained and includes necessary imports
+
+5. **Save outputs**:
+   - Save processed data to Google Drive for use in subsequent notebooks
+   - Download visualizations and results as needed
+
+### Running Locally
 
 1. **Start Jupyter Notebook**:
 ```bash
@@ -448,8 +501,9 @@ streamlit run src/visualization/interactive_charts.py
 ### Data Download
 
 1. Download the UCI Online Retail dataset from [here](https://archive.ics.uci.edu/dataset/352/online+retail)
-2. Place the dataset in `data/raw/` directory
-3. Update the data path in the loading scripts if necessary
+2. For Colab: Upload to Colab or place in Google Drive
+3. For local: Place the dataset in `data/raw/` directory
+4. Update the data path in the loading scripts if necessary
 
 ---
 

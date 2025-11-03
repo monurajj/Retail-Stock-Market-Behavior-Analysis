@@ -1,0 +1,11 @@
+Kaggle dataset:
+URL: https://www.kaggle.com/datasets/utkalk/large-retail-data-set-for-eda/data
+Slug: utkalk/large-retail-data-set-for-eda
+
+Download (requires kaggle CLI configured with ~/.kaggle/kaggle.json):
+1) pip install kaggle
+2) kaggle datasets download utkalk/large-retail-data-set-for-eda -p data/external/retail_kaggle --unzip
+
+Notes:
+- Inspect CSVs after download; typical files may include transactions, products, customers.
+- Start EDA: list CSVs and read the largest transactional file for insights.
