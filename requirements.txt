@@ -14,3 +14,22 @@ scipy>=1.9.0
 openpyxl>=3.0.10
 xlrd>=2.0.1
 
+
+Project 5: Retail Stock Market Behavior 
+Problem Statement
+
+
+Retailers collect massive amounts of transaction data. The goal is to analyze customer purchasing behavior to find meaningful associations and trends. 
+
+Dataset: UCI Online retail dataset https://archive.ics.uci.edu/dataset/352/online+retail , Kaggle Grocery data
+
+
+Few Exploratory Questions
+Which products are most frequently bought together?
+Do certain times of day/week show higher purchase volume?
+What does customer segmentation by basket size reveal?
+Are there seasonal purchase patterns (e.g., holiday spikes)?
+Is there a way to cluster customers based on this data ? Showcase it using supervised or un-supervised clustering, please mention why you picked one over the other. 
+Aggregate the data on yearly granularity for each country, then produce an interactive bar chart which allows users to select a country and then it shows the yearly sales for the respective country. 
+Perform predictive and descriptive analysis using this data and any other sources you deem necessary. Mention your analysis philosophy, design and methodology alongside the findings of your analysis.
+
