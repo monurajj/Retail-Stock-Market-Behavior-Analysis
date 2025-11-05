@@ -13,7 +13,7 @@ This project focuses on comprehensive behavioral analysis of retail transaction 
 
 - Monu Kumar
 - Rhythm Jain
-- Aditya Kumar
+- Aditya Raj Sharma
 
 ---
 
