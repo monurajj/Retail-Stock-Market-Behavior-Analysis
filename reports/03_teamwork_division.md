@@ -22,19 +22,16 @@
 ## 1. Team Overview
 
 **Project:** Retail Stock Market Behavior Analysis  
-**Team Size:** [To be filled by team]  
+**Team Size:** 3 members  
 **Project Duration:** Phase 2 (Weeks 1-3)
 
 ### Team Members
 
 | Member Name | Student ID | Role | Primary Responsibilities |
 |------------|------------|------|------------------------|
-| [Member 1] | [ID] | Lead Analyst | Overall coordination, EDA, Methodology |
-| [Member 2] | [ID] | Data Engineer | Preprocessing, Data Quality |
-| [Member 3] | [ID] | ML Engineer | Association Mining, Predictive Models |
-| [Member 4] | [ID] | Business Analyst | Temporal Analysis, Insights |
-
-*Note: Update with actual team member names and IDs*
+| Monu Kumar | [ID] | Coding Lead | Implementation, Code Development, Technical Analysis |
+| Rhythm Jain | [ID] | Research Lead | Research Methodology, Literature Review, Analysis |
+| Aditya Raj Sharma | [ID] | Research & Presentation Lead | Research, Documentation, Presentation |
 
 ---
 
@@ -44,19 +41,19 @@
 
 | Module | Module Name | Assigned To | Status | Deliverables |
 |--------|------------|-------------|--------|--------------|
-| **01** | Data Exploration | [Member 1] | ✅ Complete | Full EDA notebook with all required components |
-| **02** | Data Preprocessing | [Member 2] | ✅ Complete | Cleaned dataset, feature engineering |
-| **03** | Association Analysis | [Member 3] | ⚠️ Partial | Apriori/FPGrowth implementation, rule interpretation |
-| **04** | Temporal Analysis | [Member 4] | ⚠️ Partial | Time-series decomposition, trend analysis |
-| **05** | Customer Segmentation | [Member 1] | ❌ Optional | RFM analysis (if time permits) |
-| **06** | Seasonal Analysis | [Member 4] | ⚠️ Partial | Seasonal decomposition, pattern identification |
-| **07** | Geographical Analysis | [Member 2] | ❌ Optional | Basic geographical EDA (if time permits) |
-| **08** | Predictive Modeling | [Member 3] | ❌ Planning | Model planning and approach documentation |
+| **01** | Data Exploration | Monu Kumar | ✅ Complete | Full EDA notebook with all required components |
+| **02** | Data Preprocessing | Monu Kumar | ✅ Complete | Cleaned dataset, feature engineering |
+| **03** | Association Analysis | Monu Kumar | ✅ Complete | Apriori implementation, rule interpretation |
+| **04** | Temporal Analysis | Rhythm Jain | ✅ Complete | Time-series decomposition, trend analysis |
+| **05** | Customer Segmentation | Rhythm Jain | ✅ Complete | RFM analysis (included in EDA) |
+| **06** | Seasonal Analysis | Rhythm Jain | ✅ Complete | Seasonal decomposition, pattern identification |
+| **07** | Geographical Analysis | Aditya Raj Sharma | ✅ Complete | Geographical EDA (included in EDA) |
+| **08** | Predictive Modeling | Aditya Raj Sharma | ❌ Planning | Model planning and approach documentation |
 
 ### Module Responsibilities Detail
 
 #### Module 01: Data Exploration
-- **Assigned To:** [Member 1]
+- **Assigned To:** Monu Kumar
 - **Responsibilities:**
   - Comprehensive EDA with all required components
   - Summary statistics generation
@@ -74,7 +71,7 @@
   - Key insights documentation
 
 #### Module 02: Data Preprocessing
-- **Assigned To:** [Member 2]
+- **Assigned To:** Monu Kumar
 - **Responsibilities:**
   - Data cleaning and validation
   - Missing value treatment
@@ -88,7 +85,7 @@
   - Preprocessing summary report
 
 #### Module 03: Association Analysis
-- **Assigned To:** [Member 3]
+- **Assigned To:** Monu Kumar
 - **Responsibilities:**
   - Transaction data preparation
   - Apriori algorithm implementation
@@ -102,7 +99,7 @@
   - Business recommendations based on rules
 
 #### Module 04: Temporal Analysis
-- **Assigned To:** [Member 4]
+- **Assigned To:** Rhythm Jain
 - **Responsibilities:**
   - Time-series data preparation
   - Temporal pattern identification
@@ -115,7 +112,7 @@
   - Temporal pattern summary
 
 #### Module 05: Customer Segmentation
-- **Assigned To:** [Member 1]
+- **Assigned To:** Rhythm Jain
 - **Status:** Optional for Phase 2
 - **Responsibilities:**
   - RFM analysis implementation
@@ -126,7 +123,7 @@
   - RFM summary
 
 #### Module 06: Seasonal Analysis
-- **Assigned To:** [Member 4]
+- **Assigned To:** Rhythm Jain
 - **Responsibilities:**
   - Seasonal pattern identification
   - Seasonal decomposition
@@ -138,7 +135,7 @@
   - Seasonal pattern insights
 
 #### Module 07: Geographical Analysis
-- **Assigned To:** [Member 2]
+- **Assigned To:** Aditya Raj Sharma
 - **Status:** Optional for Phase 2
 - **Responsibilities:**
   - Country-level analysis
@@ -148,7 +145,7 @@
   - Geographical analysis notebook (if completed)
 
 #### Module 08: Predictive Modeling
-- **Assigned To:** [Member 3]
+- **Assigned To:** Aditya Raj Sharma
 - **Status:** Planning only for Phase 2
 - **Responsibilities:**
   - Model approach planning
@@ -168,9 +165,9 @@ To ensure balanced leadership and shared responsibility, we implement a rotating
 
 | Week | Leader | Responsibilities | Focus Areas |
 |------|--------|-----------------|------------|
-| **Week 1** | [Member 1] | Project kickoff, EDA completion, team coordination | Data understanding, initial insights |
-| **Week 2** | [Member 2] | Preprocessing completion, quality assurance, progress review | Data quality, feature engineering |
-| **Week 3** | [Member 3] | Analysis completion, integration, final deliverables | Association mining, temporal analysis, documentation |
+| **Week 1** | Monu Kumar | Project kickoff, EDA completion, team coordination | Data understanding, initial insights, coding setup |
+| **Week 2** | Rhythm Jain | Preprocessing completion, quality assurance, research methodology | Data quality, feature engineering, research documentation |
+| **Week 3** | Aditya Raj Sharma | Analysis completion, integration, final deliverables, presentation | Association mining, temporal analysis, documentation, presentation prep |
 
 ### Leadership Responsibilities
 
@@ -413,10 +410,9 @@ Week 3: [Member 3] - Association analysis completion
 
 | Member | Email | GitHub Username | Preferred Contact Method |
 |--------|-------|----------------|-------------------------|
-| [Member 1] | [email] | [username] | [method] |
-| [Member 2] | [email] | [username] | [method] |
-| [Member 3] | [email] | [username] | [method] |
-| [Member 4] | [email] | [username] | [method] |
+| Monu Kumar | [email] | [username] | [method] |
+| Rhythm Jain | [email] | [username] | [method] |
+| Aditya Raj Sharma | [email] | [username] | [method] |
 
 ---
 
