@@ -1,0 +1,164 @@
+# 🧾 **Phase 2 – Project Requirements & Deliverables**
+
+### *Retail Stock Market Behavior – Data Mining Project*
+
+---
+
+## ✅ **1. Full EDA (Exploratory Data Analysis) – 25 Marks**
+
+**This module must be fully completed for Phase 2.**
+Include all work in the folder: **`01_data_exploration/`**
+
+### **Required Components:**
+
+* Summary statistics
+* Distribution plots (Histogram, KDE, Boxplot)
+* Correlation heatmap
+* Missing data matrix
+* Outlier detection (IQR, Z-score)
+* Time-trend plots (key for stock behavior understanding)
+* Customer-level summaries (RFM-style optional)
+* Product/Category-level insights
+* Deep insights:
+
+  * Market volatility observations
+  * Seasonal hints
+  * Geographical demand patterns (if available)
+
+### **Goal:**
+
+Produce a **comprehensive, insight-rich EDA** that justifies **20–25 marks**.
+
+---
+
+## ✅ **2. Research Methodology – 15 Marks**
+
+This section must also be complete for Phase 2.
+
+### **Include the following:**
+
+### **Methodology Steps**
+
+1. Data understanding
+2. Data cleaning & preprocessing
+3. Association mining
+4. Temporal analysis
+5. Customer segmentation (overview)
+6. Predictive modeling (planned approach)
+7. Evaluation metrics
+
+### **Must Describe:**
+
+* Why each method is chosen
+* Why it is suitable for *retail stock market behavior*
+* Limitations of the approach (very important for high marks)
+
+### **Goal:**
+
+Provide a clear, well-justified methodology targeting **12–15 marks**.
+
+---
+
+## ✅ **3. Consistency & Division of Work – 10 Marks**
+
+Prepare clear, documented teamwork evidence.
+
+### **Required Items:**
+
+* Table showing team members + assigned modules (01–08)
+* Rotating leadership plan:
+
+  * Week 1 Leader → Week 2 Leader → Week 3 Leader
+* GitHub contribution logs/screenshots
+* Collaboration evidence (Google Docs/Notion, optional)
+
+### **Goal:**
+
+Demonstrate structured teamwork and role clarity.
+
+---
+
+## ⚠ **4. Predictive / Descriptive Analysis – 50 Marks**
+
+*Full modeling is NOT required in Phase 2.*
+
+### **Modules Required by Phase 2:**
+
+| Module                       | Required?      | Details                                            |
+| ---------------------------- | -------------- | -------------------------------------------------- |
+| **01_data_exploration**      | ✅ Complete     | Full EDA with insights                             |
+| **02_data_preprocessing**    | ✅ Complete     | Cleaning, missing data, encoding, feature creation |
+| **03_association_analysis**  | ⚠ Partial      | Run Apriori/FPGrowth + basic interpretation        |
+| **04_temporal_analysis**     | ⚠ Partial      | Time-series decomposition & early patterns         |
+| **05_customer_segmentation** | ❌ Optional     | Only initial RFM summary if needed                 |
+| **06_seasonal_analysis**     | ⚠ Partial      | Seasonal decomposition only                        |
+| **07_geographical_analysis** | ❌ Optional     | Basic EDA maps only                                |
+| **08_predictive_modeling**   | ❌ Not required | Only model planning                                |
+
+---
+
+## ⭐ **Minimum Required for Phase 2 (Guaranteed Pass Criteria)**
+
+You MUST submit:
+
+1️⃣ Complete EDA
+2️⃣ Complete Data Preprocessing
+3️⃣ Research Methodology
+4️⃣ Teamwork / Roles Documentation
+5️⃣ Initial descriptive findings from:
+
+* Association mining
+* Temporal analysis
+* Seasonal analysis
+
+---
+
+## 🚀 **Recommended Deliverable Structure**
+
+### **📁 Notebook 01 – Data Exploration**
+
+* Summary statistics
+* Visualizations
+* Insight explanations
+* Heatmaps
+* Trend analysis
+
+### **📁 Notebook 02 – Data Preprocessing**
+
+* Missing value treatment
+* Outlier handling
+* Scaling / Encoding
+* Feature engineering
+* Export of clean dataset
+
+### **📁 Notebook 03 – Descriptive Findings**
+
+* Top association rules + interpretation
+* Temporal decomposition (trend, residuals, seasonality)
+* Seasonal effects
+* Optional geographic EDA
+
+---
+
+## 📝 **Report Sections (for submission)**
+
+* Problem Statement
+* Literature Review
+* Research Methodology
+* Roles & Responsibilities
+* EDA Summary
+* Preprocessing Summary
+* Early Findings (association, temporal, seasonal)
+
+---
+
+## 🎯 **High-Scoring Strategy**
+
+To target the **top mark band**:
+
+✔ Provide **insightful**, not just visual, EDA
+✔ Link findings to **Retail Stock Market Behavior**
+✔ Justify every method in methodology
+✔ Show clear teamwork and role distribution
+✔ Ensure the dataset is fully cleaned for Phase 3
+
