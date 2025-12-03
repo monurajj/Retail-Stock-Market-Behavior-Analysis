@@ -8,6 +8,47 @@ type PredictionResponse = {
   horizon: string;
   forecastSummary: string;
   churnSummary: string;
+  kpis?: {
+    totalRevenue: number;
+    totalQuantity: number;
+    uniqueCustomers: number;
+    uniqueProducts: number;
+    avgTransactionValue?: number;
+    medianTransactionValue?: number;
+  };
+  topInsights?: {
+    topProductByRevenue: { productId: string; revenue: number };
+    topProductByQuantity: { productId: string; quantity: number };
+    highestEarningCustomer: { customerId: string; revenue: number };
+    mostFrequentCustomer: { customerId: string; visits: number };
+  };
+  detailedInsights?: {
+    top5Customers: Array<{
+      rank: number;
+      customerId: string;
+      revenue: number;
+      visits: number;
+      avgSpendPerVisit: number;
+    }>;
+    top5Products: Array<{
+      rank: number;
+      productId: string;
+      revenue: number;
+      quantity: number;
+      avgPrice: number;
+    }>;
+    customerSegmentation: {
+      highSpenders: number;
+      mediumSpenders: number;
+      lowSpenders: number;
+      highSpenderThreshold: number;
+      mediumSpenderThreshold: number;
+    };
+    purchaseFrequency: {
+      avgVisitsPerCustomer: number;
+      medianVisitsPerCustomer: number;
+    };
+  };
 };
 
 type CsvPoint = {
@@ -35,14 +76,27 @@ export default function HomePage() {
 
     try {
       setLoading(true);
+      const start = performance.now();
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("periodicity", periodicity);
 
-      const res = await fetch("/api/predict", {
+      const requestPromise = fetch("/api/predict", {
         method: "POST",
         body: formData
       });
+
+      // Ensure loader is visible for at least 1 second
+      const minDelayPromise = new Promise((resolve) => {
+        const elapsed = performance.now() - start;
+        const remaining = Math.max(0, 1000 - elapsed);
+        setTimeout(resolve, remaining);
+      });
+
+      const res = await Promise.race([
+        Promise.all([requestPromise, minDelayPromise]).then(([r]) => r as Response)
+      ]);
 
       if (!res.ok) {
         const text = await res.text();
@@ -88,47 +142,55 @@ export default function HomePage() {
 
   return (
     <main className="space-y-10">
+      {/* Header */}
+      <section className="space-y-2">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Retail Stock Behavior Dashboard
+        </h1>
+        <p className="text-sm text-slate-400">
+          For shopkeepers to upload monthly / yearly reports and view model-driven insights.
+        </p>
+      </section>
+
       {/* Top hero + KPI strip */}
       <section className="space-y-5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="space-y-1">
-            <h2 className="text-xl font-semibold tracking-tight">
-              Retail Intelligence Overview
-            </h2>
-            <p className="text-sm text-slate-400 max-w-2xl">
-              Upload your latest sales report and let the model surface customers likely to buy
-              again, churn risk, and product demand so you can act quickly.
-            </p>
-          </div>
-        </div>
-
         <div className="grid gap-4 md:grid-cols-4">
           <div className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
             <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
-              Prediction status
+              Total revenue
             </p>
             <p className="text-sm font-semibold">
-              {loading ? "Running model..." : result ? "Latest prediction ready" : "Waiting for file"}
+              {result?.kpis
+                ? `£${result.kpis.totalRevenue.toLocaleString(undefined, {
+                    maximumFractionDigits: 0
+                  })}`
+                : loading
+                ? "Calculating..."
+                : "—"}
             </p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
             <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
-              Report type
-            </p>
-            <p className="text-sm font-semibold capitalize">{periodicity}</p>
-          </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
-              Focused insights
-            </p>
-            <p className="text-sm font-semibold">Demand & churn</p>
-          </div>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
-            <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
-              Next step
+              Total quantity
             </p>
             <p className="text-sm font-semibold">
-              {result ? "Review insights below" : "Upload CSV & run prediction"}
+              {result?.kpis ? result.kpis.totalQuantity.toLocaleString() : loading ? "…" : "—"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+            <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
+              Unique customers
+            </p>
+            <p className="text-sm font-semibold">
+              {result?.kpis ? result.kpis.uniqueCustomers.toLocaleString() : loading ? "…" : "—"}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+            <p className="text-[11px] uppercase tracking-wide text-slate-400 mb-1">
+              Unique products
+            </p>
+            <p className="text-sm font-semibold">
+              {result?.kpis ? result.kpis.uniqueProducts.toLocaleString() : loading ? "…" : "—"}
             </p>
           </div>
         </div>
@@ -187,9 +249,12 @@ export default function HomePage() {
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2 text-sm font-semibold text-slate-950 shadow hover:bg-accent/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors w-full md:w-auto"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-slate-950 shadow hover:bg-accent/90 disabled:opacity-60 disabled:cursor-not-allowed transition-colors w-full md:w-auto"
           >
-            {loading ? "Running model..." : "Run prediction"}
+            {loading && (
+              <span className="inline-block h-3 w-3 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" />
+            )}
+            {loading ? "Running prediction..." : "Run prediction"}
           </button>
 
           {error && (
@@ -207,23 +272,33 @@ export default function HomePage() {
             </li>
             <li>
               The <code>/api/predict</code> route should forward the file to your{" "}
-              <strong>Python backend</strong> (FastAPI/Flask) which loads the ARIMA, Prophet and
-              churn models from this repo.
+              <strong>Python backend</strong> (FastAPI) which parses the CSV, computes KPIs,
+              identifies top products/customers and (optionally) runs churn models.
             </li>
             <li>
-              The backend returns JSON with forecast summary (next periods) and customer churn
-              insights, which we render below.
+              The backend returns JSON with forecast summaries, customer insights and metrics, which
+              we render below in text and charts.
             </li>
           </ul>
           <p className="text-xs text-slate-400 mt-2">
-            Currently the API route is a <strong>stub</strong> that returns a mock response. You can
-            replace it later to call your actual Python model service.
+            The current implementation already uses real values computed from each uploaded file.
+            You can plug in your saved RF/XGBoost churn model later without changing the frontend.
           </p>
         </div>
       </section>
 
       {/* Prediction output + insight structure */}
-      <section className="space-y-4">
+      <section className="space-y-4 relative">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-slate-950/60 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-2">
+              <span className="h-8 w-8 rounded-full border-4 border-accent border-t-transparent animate-spin" />
+              <p className="text-xs text-slate-300">
+                Running model on your report. This may take a few seconds...
+              </p>
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-semibold">Prediction output</h3>
           <p className="text-[11px] text-slate-400">
@@ -300,10 +375,139 @@ export default function HomePage() {
               ) : (
                 <p className="text-sm text-slate-200 leading-relaxed">{result.churnSummary}</p>
               )}
-              <p className="text-[11px] text-slate-500 mt-1">
-                In a full deployment, this card can link to a table of customers with churn
-                probabilities and recommended actions.
-              </p>
+              {result?.topInsights && (
+                <div className="mt-3 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-300 mb-1.5">Quick Summary:</p>
+                    <ul className="list-disc list-inside text-[11px] text-slate-300 space-y-1">
+                      <li>
+                        <span className="font-semibold">Top product by revenue:</span> ID{" "}
+                        {result.topInsights.topProductByRevenue.productId} (
+                        £{result.topInsights.topProductByRevenue.revenue.toLocaleString(undefined, {
+                          maximumFractionDigits: 0
+                        })}
+                        )
+                      </li>
+                      <li>
+                        <span className="font-semibold">Top product by quantity:</span> ID{" "}
+                        {result.topInsights.topProductByQuantity.productId} (
+                        {result.topInsights.topProductByQuantity.quantity.toLocaleString()} units)
+                      </li>
+                      <li>
+                        <span className="font-semibold">Highest-earning customer:</span> ID{" "}
+                        {result.topInsights.highestEarningCustomer.customerId} (
+                        £{result.topInsights.highestEarningCustomer.revenue.toLocaleString(
+                          undefined,
+                          { maximumFractionDigits: 0 }
+                        )}
+                        )
+                      </li>
+                      <li>
+                        <span className="font-semibold">Most frequent customer:</span> ID{" "}
+                        {result.topInsights.mostFrequentCustomer.customerId} (
+                        {result.topInsights.mostFrequentCustomer.visits.toLocaleString()} visits)
+                      </li>
+                    </ul>
+                  </div>
+
+                  {result.detailedInsights && (
+                    <>
+                      {/* Top 5 Customers */}
+                      <div className="mt-3 pt-3 border-t border-slate-700">
+                        <p className="text-xs font-semibold text-slate-300 mb-2">Top 5 Customers by Revenue:</p>
+                        <div className="space-y-1.5">
+                          {result.detailedInsights.top5Customers.map((cust) => (
+                            <div key={cust.customerId} className="flex justify-between items-center text-[11px] bg-slate-800/50 px-2 py-1.5 rounded">
+                              <div>
+                                <span className="font-semibold text-slate-200">#{cust.rank}</span>{" "}
+                                <span className="text-slate-300">Customer {cust.customerId}</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-slate-200 font-semibold">
+                                  £{cust.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                </div>
+                                <div className="text-slate-400 text-[10px]">
+                                  {cust.visits} visits • £{cust.avgSpendPerVisit.toFixed(0)}/visit
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Top 5 Products */}
+                      <div className="mt-3 pt-3 border-t border-slate-700">
+                        <p className="text-xs font-semibold text-slate-300 mb-2">Top 5 Products by Revenue:</p>
+                        <div className="space-y-1.5">
+                          {result.detailedInsights.top5Products.map((prod) => (
+                            <div key={prod.productId} className="flex justify-between items-center text-[11px] bg-slate-800/50 px-2 py-1.5 rounded">
+                              <div>
+                                <span className="font-semibold text-slate-200">#{prod.rank}</span>{" "}
+                                <span className="text-slate-300">Product {prod.productId}</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-slate-200 font-semibold">
+                                  £{prod.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                </div>
+                                <div className="text-slate-400 text-[10px]">
+                                  {prod.quantity} units • £{prod.avgPrice.toFixed(0)}/unit
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Customer Segmentation */}
+                      <div className="mt-3 pt-3 border-t border-slate-700">
+                        <p className="text-xs font-semibold text-slate-300 mb-2">Customer Segmentation:</p>
+                        <div className="grid grid-cols-3 gap-2 text-[11px]">
+                          <div className="bg-green-900/30 border border-green-700/50 px-2 py-1.5 rounded text-center">
+                            <div className="text-green-300 font-semibold">{result.detailedInsights.customerSegmentation.highSpenders}</div>
+                            <div className="text-green-400 text-[10px]">High Spenders</div>
+                            <div className="text-green-500 text-[9px] mt-0.5">
+                              ≥£{result.detailedInsights.customerSegmentation.highSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </div>
+                          </div>
+                          <div className="bg-yellow-900/30 border border-yellow-700/50 px-2 py-1.5 rounded text-center">
+                            <div className="text-yellow-300 font-semibold">{result.detailedInsights.customerSegmentation.mediumSpenders}</div>
+                            <div className="text-yellow-400 text-[10px]">Medium</div>
+                            <div className="text-yellow-500 text-[9px] mt-0.5">
+                              £{result.detailedInsights.customerSegmentation.mediumSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}-{result.detailedInsights.customerSegmentation.highSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </div>
+                          </div>
+                          <div className="bg-red-900/30 border border-red-700/50 px-2 py-1.5 rounded text-center">
+                            <div className="text-red-300 font-semibold">{result.detailedInsights.customerSegmentation.lowSpenders}</div>
+                            <div className="text-red-400 text-[10px]">Low Spenders</div>
+                            <div className="text-red-500 text-[9px] mt-0.5">
+                              &lt;£{result.detailedInsights.customerSegmentation.mediumSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Purchase Frequency Stats */}
+                      <div className="mt-3 pt-3 border-t border-slate-700">
+                        <p className="text-xs font-semibold text-slate-300 mb-1.5">Purchase Frequency:</p>
+                        <div className="grid grid-cols-2 gap-2 text-[11px]">
+                          <div className="bg-slate-800/50 px-2 py-1.5 rounded">
+                            <div className="text-slate-400 text-[10px]">Avg Visits/Customer</div>
+                            <div className="text-slate-200 font-semibold">
+                              {result.detailedInsights.purchaseFrequency.avgVisitsPerCustomer.toFixed(1)}
+                            </div>
+                          </div>
+                          <div className="bg-slate-800/50 px-2 py-1.5 rounded">
+                            <div className="text-slate-400 text-[10px]">Median Visits</div>
+                            <div className="text-slate-200 font-semibold">
+                              {result.detailedInsights.purchaseFrequency.medianVisitsPerCustomer.toFixed(1)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg shadow-slate-950/40 space-y-2">
