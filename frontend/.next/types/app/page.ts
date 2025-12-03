@@ -1,4 +1,4 @@
-// File: /Users/monurajj/Desktop/DataMinining/Retail-Stock-Market-Behavior-Analysis/frontend/app/page.tsx
+// File: /Users/monurajj/Desktop/Retail-Stock-Market-Behavior-Analysis/frontend/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

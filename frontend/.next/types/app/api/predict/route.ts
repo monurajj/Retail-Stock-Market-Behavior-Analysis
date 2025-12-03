@@ -1,4 +1,4 @@
-// File: /Users/monurajj/Desktop/DataMinining/Retail-Stock-Market-Behavior-Analysis/frontend/app/api/predict/route.ts
+// File: /Users/monurajj/Desktop/Retail-Stock-Market-Behavior-Analysis/frontend/app/api/predict/route.ts
 import * as entry from '../../../../../app/api/predict/route.js'
 import type { NextRequest } from 'next/server.js'
 
