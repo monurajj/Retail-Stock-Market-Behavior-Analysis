@@ -63,6 +63,21 @@ type PredictionResponse = {
       medianVisitsPerCustomer: number;
     };
   };
+  randomForestModel?: {
+    modelUsed: boolean;
+    description: string;
+    accuracy?: number;
+    rocAuc?: number | null;
+    featureImportances?: Record<string, number>;
+    topAtRiskCustomers?: Array<{
+      customerId: string;
+      recencyDays: number;
+      frequency: number;
+      totalSpent: number;
+      churnProbability: number;
+    }>;
+    reason?: string;
+  };
 };
 
 type CsvPoint = {
@@ -215,7 +230,7 @@ export default function HomePage() {
           <p className="font-semibold text-gray-900">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {typeof entry.value === 'number' ? `£${entry.value.toLocaleString()}` : entry.value}
+              {entry.name}: {typeof entry.value === 'number' ? `Rs${entry.value.toLocaleString()}` : entry.value}
             </p>
           ))}
         </div>
@@ -235,7 +250,7 @@ export default function HomePage() {
                 <p className="text-sm font-medium text-gray-600 mb-1">Total Revenue</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {result?.kpis
-                    ? `£${result.kpis.totalRevenue.toLocaleString(undefined, {
+                    ? `Rs${result.kpis.totalRevenue.toLocaleString(undefined, {
                         maximumFractionDigits: 0
                       })}`
                     : loading
@@ -467,7 +482,7 @@ export default function HomePage() {
                     tick={{ fontSize: 12, fill: "#6b7280" }}
                     tickLine={false}
                     width={80}
-                    tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                    tickFormatter={(value) => `Rs${(value / 1000).toFixed(0)}k`}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Line
@@ -487,14 +502,192 @@ export default function HomePage() {
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Demand & Revenue Outlook</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">{result.forecastSummary}</p>
+              <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                {result.forecastSummary}
+              </p>
+              {chartData.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-xs font-semibold text-gray-500 mb-1">
+                    Recent revenue snapshot (bars from your uploaded file)
+                  </p>
+                  <div className="h-36">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={chartData}
+                        margin={{ top: 5, right: 20, left: 0, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis
+                          dataKey="date"
+                          tick={{ fontSize: 10, fill: "#9ca3af" }}
+                          tickLine={false}
+                          minTickGap={40}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 10, fill: "#9ca3af" }}
+                          tickLine={false}
+                          width={60}
+                          tickFormatter={(value) => `Rs${(value / 1000).toFixed(0)}k`}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Bar
+                          dataKey="revenue"
+                          fill={COLORS.accent}
+                          radius={[6, 6, 0, 0]}
+                          maxBarSize={20}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Customer Behavior Insights</h3>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Customer Behavior Insights</h3>
               <p className="text-sm text-gray-700 leading-relaxed">{result.churnSummary}</p>
             </div>
           </div>
+
+          {/* Random Forest Churn Model Section */}
+          {result.randomForestModel && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Random Forest Churn Model
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-1 max-w-2xl">
+                    {result.randomForestModel.description}
+                  </p>
+                </div>
+              </div>
+
+              {result.randomForestModel.modelUsed ? (
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-2 text-xs">
+                    {typeof result.randomForestModel.accuracy === "number" && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-md px-3 py-2">
+                        <p className="text-[11px] font-semibold text-blue-900 mb-1">
+                          Accuracy
+                        </p>
+                        <p className="text-sm font-bold text-blue-700">
+                          {(result.randomForestModel.accuracy * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    )}
+                    {typeof result.randomForestModel.rocAuc === "number" && (
+                      <div className="bg-indigo-50 border border-indigo-100 rounded-md px-3 py-2">
+                        <p className="text-[11px] font-semibold text-indigo-900 mb-1">
+                          ROC-AUC
+                        </p>
+                        <p className="text-sm font-bold text-indigo-700">
+                          {result.randomForestModel.rocAuc.toFixed(3)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
+                    {result.randomForestModel.topAtRiskCustomers &&
+                      result.randomForestModel.topAtRiskCustomers.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-700 mb-1">
+                            Top At‑Risk Customers (by churn probability)
+                          </p>
+                          <div className="border border-gray-100 rounded-lg overflow-hidden">
+                            <table className="min-w-full divide-y divide-gray-100">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                                    Customer
+                                  </th>
+                                  <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                                    Churn Prob.
+                                  </th>
+                                  <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                                    Recency (days)
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-100">
+                                {result.randomForestModel.topAtRiskCustomers.map((cust) => (
+                                  <tr key={cust.customerId}>
+                                    <td className="px-3 py-2 text-xs text-gray-800">
+                                      {cust.customerId}
+                                    </td>
+                                    <td className="px-3 py-2 text-xs text-gray-900 text-right">
+                                      {(cust.churnProbability * 100).toFixed(1)}%
+                                    </td>
+                                    <td className="px-3 py-2 text-xs text-gray-900 text-right">
+                                      {cust.recencyDays}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-600 mb-1">
+                        How to read ROC‑AUC score
+                      </p>
+                      <div className="overflow-hidden rounded-md border border-gray-100">
+                        <table className="min-w-full divide-y divide-gray-100">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                                AUC Score
+                              </th>
+                              <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                                Model Performance
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-100 text-[11px]">
+                            <tr>
+                              <td className="px-3 py-1.5 text-gray-800">1.0</td>
+                              <td className="px-3 py-1.5 text-gray-800">Perfect model</td>
+                            </tr>
+                            <tr>
+                              <td className="px-3 py-1.5 text-gray-800">0.9 – 1.0</td>
+                              <td className="px-3 py-1.5 text-gray-800">Excellent</td>
+                            </tr>
+                            <tr>
+                              <td className="px-3 py-1.5 text-gray-800">0.8 – 0.9</td>
+                              <td className="px-3 py-1.5 text-gray-800">Good</td>
+                            </tr>
+                            <tr>
+                              <td className="px-3 py-1.5 text-gray-800">0.7 – 0.8</td>
+                              <td className="px-3 py-1.5 text-gray-800">Fair</td>
+                            </tr>
+                            <tr>
+                              <td className="px-3 py-1.5 text-gray-800">0.6 – 0.7</td>
+                              <td className="px-3 py-1.5 text-gray-800">Poor</td>
+                            </tr>
+                            <tr>
+                              <td className="px-3 py-1.5 text-gray-800">0.5</td>
+                              <td className="px-3 py-1.5 text-gray-800">
+                                No better than random guessing
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                result.randomForestModel.reason && (
+                  <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
+                    {result.randomForestModel.reason}
+                  </p>
+                )
+              )}
+            </div>
+          )}
 
           {/* Top Customers and Products Charts */}
           <div className="grid gap-6 lg:grid-cols-2">
@@ -516,7 +709,7 @@ export default function HomePage() {
                       tick={{ fontSize: 12, fill: "#6b7280" }}
                       tickLine={false}
                       width={80}
-                      tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                      tickFormatter={(value) => `Rs${(value / 1000).toFixed(0)}k`}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="revenue" fill={COLORS.primary} radius={[8, 8, 0, 0]} />
@@ -543,7 +736,7 @@ export default function HomePage() {
                       tick={{ fontSize: 12, fill: "#6b7280" }}
                       tickLine={false}
                       width={80}
-                      tickFormatter={(value) => `£${(value / 1000).toFixed(0)}k`}
+                      tickFormatter={(value) => `Rs${(value / 1000).toFixed(0)}k`}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="revenue" fill={COLORS.success} radius={[8, 8, 0, 0]} />
@@ -591,7 +784,7 @@ export default function HomePage() {
                           </span>
                         </div>
                         <p className="text-xs text-green-700">
-                          ≥ £{result.detailedInsights.customerSegmentation.highSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          ≥ Rs{result.detailedInsights.customerSegmentation.highSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </p>
                       </div>
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -602,7 +795,7 @@ export default function HomePage() {
                           </span>
                         </div>
                         <p className="text-xs text-yellow-700">
-                          £{result.detailedInsights.customerSegmentation.mediumSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })} - £{result.detailedInsights.customerSegmentation.highSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          Rs{result.detailedInsights.customerSegmentation.mediumSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })} - Rs{result.detailedInsights.customerSegmentation.highSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </p>
                       </div>
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -613,7 +806,7 @@ export default function HomePage() {
                           </span>
                         </div>
                         <p className="text-xs text-red-700">
-                          &lt; £{result.detailedInsights.customerSegmentation.mediumSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                          &lt; Rs{result.detailedInsights.customerSegmentation.mediumSpenderThreshold.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </p>
                       </div>
                     </>
@@ -649,7 +842,7 @@ export default function HomePage() {
                 <p className="text-xs font-semibold text-blue-900 uppercase tracking-wide mb-2">Top Product (Revenue)</p>
                 <p className="text-lg font-bold text-blue-900 mb-1">Product {result.topInsights.topProductByRevenue.productId}</p>
                 <p className="text-2xl font-bold text-blue-700">
-                  £{result.topInsights.topProductByRevenue.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  Rs{result.topInsights.topProductByRevenue.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </p>
               </div>
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-5">
@@ -663,7 +856,7 @@ export default function HomePage() {
                 <p className="text-xs font-semibold text-purple-900 uppercase tracking-wide mb-2">Top Customer (Revenue)</p>
                 <p className="text-lg font-bold text-purple-900 mb-1">Customer {result.topInsights.highestEarningCustomer.customerId}</p>
                 <p className="text-2xl font-bold text-purple-700">
-                  £{result.topInsights.highestEarningCustomer.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  Rs{result.topInsights.highestEarningCustomer.revenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                 </p>
               </div>
               <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-5">

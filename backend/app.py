@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from io import BytesIO
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, roc_auc_score
 
 app = FastAPI(
     title="Retail Stock Behavior API",
@@ -178,20 +181,139 @@ async def predict(
     min_record_revenue = float(df[revenue_col].min())
 
     forecast_summary = (
-        f"Across the uploaded report, total revenue is £{total_revenue:,.0f} "
-        f"over {len(df):,} records, with an average of £{avg_record_revenue:,.0f} "
-        f"per record. The highest single-record revenue is £{max_record_revenue:,.0f} "
-        f"and the lowest is £{min_record_revenue:,.0f}. Use these patterns to plan "
+        f"Across the uploaded report, total revenue is Rs{total_revenue:,.0f} "
+        f"over {len(df):,} records, with an average of Rs{avg_record_revenue:,.0f} "
+        f"per record. The highest single-record revenue is Rs{max_record_revenue:,.0f} "
+        f"and the lowest is Rs{min_record_revenue:,.0f}. Use these patterns to plan "
         "stock levels and staffing for similar periods."
     )
 
     churn_summary = (
         f"Based on this report, focus retention on customers whose spend or visit "
         f"frequency is dropping between periods, especially compared to your top "
-        f"earners like customer {top_customer_id} (who spent £{top_customer_revenue:,.0f}). "
-        f"Product {top_product_id} generated the highest revenue (£{top_product_revenue:,.0f}), "
+        f"earners like customer {top_customer_id} (who spent Rs{top_customer_revenue:,.0f}). "
+        f"Product {top_product_id} generated the highest revenue (Rs{top_product_revenue:,.0f}), "
         f"while product {top_qty_product_id} sold the most units ({top_qty:,})."
     )
+
+    # ------------------------------------------------------------------
+    # Random Forest customer churn modeling (classification)
+    # ------------------------------------------------------------------
+    rf_results = {
+        "modelUsed": False,
+        "description": (
+            "Random Forest is an ensemble machine learning algorithm for classification "
+            "and regression. It builds many decision trees on different subsets of the data "
+            "and averages their results (or takes a majority vote) to improve accuracy and "
+            "reduce overfitting. Here it is used to predict which customers are at higher "
+            "risk of churn based on recency, frequency and monetary value."
+        ),
+    }
+
+    try:
+        # Build customer-level features: recency, frequency, total spend
+        reference_date = df[date_col].max() + pd.Timedelta(days=1)
+        cust_last_purchase = df.groupby(cust_col)[date_col].max()
+        recency = (reference_date - cust_last_purchase).dt.days
+
+        # Align frequency and revenue with the same customer index
+        freq_aligned = cust_freq.reindex(cust_last_purchase.index).fillna(0)
+        rev_aligned = cust_rev.reindex(cust_last_purchase.index).fillna(0.0)
+
+        customer_features = pd.DataFrame(
+            {
+                "customerId": cust_last_purchase.index.astype(str),
+                "Recency": recency.astype("int64"),
+                "Frequency": freq_aligned.astype("int64"),
+                "TotalSpent": rev_aligned.astype("float64"),
+            }
+        )
+
+        # Define churn label: customers with Recency > 90 days are treated as churned
+        customer_features["Churned"] = (
+            customer_features["Recency"] > 90
+        ).astype(int)
+
+        # Only train the model if we have enough variation in the label
+        if customer_features["Churned"].nunique() > 1 and len(customer_features) >= 20:
+            feature_cols = ["Recency", "Frequency", "TotalSpent"]
+            X = customer_features[feature_cols]
+            y = customer_features["Churned"]
+
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.3, random_state=42, stratify=y
+            )
+
+            rf = RandomForestClassifier(
+                n_estimators=200,
+                max_depth=None,
+                random_state=42,
+                class_weight="balanced_subsample",
+            )
+            rf.fit(X_train, y_train)
+
+            y_pred = rf.predict(X_test)
+            y_proba = rf.predict_proba(X_test)[:, 1]
+
+            accuracy = float(accuracy_score(y_test, y_pred))
+            try:
+                roc_auc = float(roc_auc_score(y_test, y_proba))
+            except ValueError:
+                roc_auc = None
+
+            feature_importances = {
+                col: float(imp)
+                for col, imp in zip(feature_cols, rf.feature_importances_)
+            }
+
+            # Estimate churn probability for all customers and surface top 5 at-risk
+            all_proba = rf.predict_proba(X)[:, 1]
+            customer_features["churnProbability"] = all_proba
+
+            top_at_risk = (
+                customer_features.sort_values(
+                    "churnProbability", ascending=False
+                )
+                .head(5)
+                .reset_index(drop=True)
+            )
+
+            top_at_risk_list = []
+            for _, row in top_at_risk.iterrows():
+                top_at_risk_list.append(
+                    {
+                        "customerId": str(row["customerId"]),
+                        "recencyDays": int(row["Recency"]),
+                        "frequency": int(row["Frequency"]),
+                        "totalSpent": float(row["TotalSpent"]),
+                        "churnProbability": float(row["churnProbability"]),
+                    }
+                )
+
+            rf_results.update(
+                {
+                    "modelUsed": True,
+                    "accuracy": accuracy,
+                    "rocAuc": roc_auc,
+                    "featureImportances": feature_importances,
+                    "topAtRiskCustomers": top_at_risk_list,
+                }
+            )
+        else:
+            rf_results.update(
+                {
+                    "reason": (
+                        "Not enough variation in churn behaviour in this file to train a "
+                        "reliable Random Forest model."
+                    )
+                }
+            )
+    except Exception as e:
+        rf_results.update(
+            {
+                "reason": f"Random Forest model could not be trained on this file: {str(e)}"
+            }
+        )
 
     response = {
         "horizon": "Next 6 months" if periodicity == "monthly" else "Next 3 years",
@@ -238,6 +360,7 @@ async def predict(
                 "medianVisitsPerCustomer": median_visits_per_customer,
             },
         },
+        "randomForestModel": rf_results,
     }
 
     return JSONResponse(content=response)
