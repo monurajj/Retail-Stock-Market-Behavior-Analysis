@@ -135,6 +135,15 @@ export default function HomePage() {
       }
 
       const data: PredictionResponse = await res.json();
+      
+      // DEBUG: Log response to verify different files return different data
+      console.log("=== BACKEND RESPONSE ===");
+      console.log("File name:", file.name);
+      console.log("Top customer:", data.detailedInsights?.top5Customers?.[0]?.customerId);
+      console.log("Top product:", data.detailedInsights?.top5Products?.[0]?.productId);
+      console.log("Total revenue:", data.kpis?.totalRevenue);
+      console.log("========================");
+      
       setResult(data);
     } catch (err: any) {
       setError(err.message || "Unexpected error");

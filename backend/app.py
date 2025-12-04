@@ -35,8 +35,16 @@ async def predict(
     """
     content = await file.read()
     
+    # DEBUG: Log file information
+    print(f"\n=== FILE UPLOAD DEBUG ===")
+    print(f"Filename: {file.filename}")
+    print(f"File size: {len(content)} bytes")
+    print(f"Content type: {file.content_type}")
+    
     try:
         df = pd.read_csv(BytesIO(content))
+        print(f"DataFrame shape: {df.shape}")
+        print(f"Columns: {list(df.columns)}")
     except Exception as e:
         return JSONResponse(
             status_code=400,
@@ -98,6 +106,10 @@ async def predict(
     prod_rev = df.groupby(prod_col)[revenue_col].sum().sort_values(ascending=False)
     top_product_id = str(prod_rev.index[0])
     top_product_revenue = float(prod_rev.iloc[0])
+    
+    # DEBUG: Log top results
+    print(f"Top product ID: {top_product_id}, Revenue: {top_product_revenue}")
+    print(f"Top 5 products: {[str(x) for x in prod_rev.head(5).index.tolist()]}")
 
     # Top product by quantity
     prod_qty = df.groupby(prod_col)[qty_col].sum().sort_values(ascending=False)
@@ -108,6 +120,11 @@ async def predict(
     cust_rev = df.groupby(cust_col)[revenue_col].sum().sort_values(ascending=False)
     top_customer_id = str(cust_rev.index[0])
     top_customer_revenue = float(cust_rev.iloc[0])
+    
+    # DEBUG: Log top results
+    print(f"Top customer ID: {top_customer_id}, Revenue: {top_customer_revenue}")
+    print(f"Top 5 customers: {[str(x) for x in cust_rev.head(5).index.tolist()]}")
+    print("=" * 50)
 
     # Most frequent customer (by transactions)
     cust_freq = df[cust_col].value_counts()
